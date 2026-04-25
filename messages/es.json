@@ -1,0 +1,82 @@
+{
+  "common": {
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "loading": "Cargando…",
+    "search": "Buscar",
+    "confirm": "Confirmar",
+    "back": "Volver",
+    "next": "Siguiente",
+    "yes": "Sí",
+    "no": "No"
+  },
+  "errors": {
+    "unauthorized": "No tienes sesión iniciada.",
+    "forbidden": "No tienes permisos para esta acción.",
+    "not_found": "No encontrado.",
+    "validation_error": "Hay errores en los datos introducidos.",
+    "plan_limit_exceeded": "Has alcanzado el límite de tu plan.",
+    "conflict": "Conflicto con el estado actual.",
+    "rate_limited": "Demasiadas peticiones. Intenta de nuevo en unos segundos.",
+    "internal": "Ha ocurrido un error. Vuelve a intentarlo."
+  },
+  "auth": {
+    "login": {
+      "title": "Entrar",
+      "subtitle": "Accede a tu panel de FibraOS.",
+      "email": "Email",
+      "password": "Contraseña",
+      "submit": "Entrar",
+      "submitting": "Entrando…",
+      "invalidCredentials": "Credenciales incorrectas."
+    },
+    "register": {
+      "title": "Crear cuenta",
+      "subtitle": "14 días de prueba. Sin tarjeta."
+    }
+  },
+  "boxes": {
+    "types": {
+      "olt_headend": "Cabecera OLT",
+      "main_trunk": "Troncal principal",
+      "trunk": "Troncal",
+      "subtrunk": "Subtroncal",
+      "cto": "CTO",
+      "manhole": "Arqueta",
+      "splice_closure": "Caja de empalme",
+      "pole": "Poste"
+    }
+  },
+  "cables": {
+    "types": {
+      "main_trunk": "Troncal principal",
+      "trunk": "Troncal",
+      "subtrunk": "Subtroncal",
+      "drop": "Acometida"
+    }
+  },
+  "fibers": {
+    "colors": {
+      "blue": "Azul",
+      "orange": "Naranja",
+      "green": "Verde",
+      "brown": "Marrón",
+      "slate": "Gris",
+      "white": "Blanco",
+      "red": "Rojo",
+      "black": "Negro",
+      "yellow": "Amarillo",
+      "violet": "Violeta",
+      "rose": "Rosa",
+      "aqua": "Aguamarina"
+    },
+    "status": {
+      "free": "Libre",
+      "fused": "Fusionada",
+      "reserved": "Reservada",
+      "damaged": "Dañada"
+    }
+  }
+}

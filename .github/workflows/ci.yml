@@ -1,0 +1,64 @@
+name: CI
+
+on:
+  push:
+    branches: [main, staging]
+  pull_request:
+    branches: [main, staging]
+
+jobs:
+  lint-typecheck-unit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      DATABASE_URL: postgres://fibraos:fibraos_dev_pw@localhost:5432/fibraos?sslmode=disable
+      DIRECT_URL: postgres://fibraos:fibraos_dev_pw@localhost:5432/fibraos?sslmode=disable
+      REDIS_URL: redis://localhost:6379
+      AUTH_SECRET: ci_auth_secret_long_enough_to_pass_zod_validation_32b
+      NEXT_PUBLIC_APP_URL: http://app.fibraos.local:3000
+      NEXT_PUBLIC_ROOT_DOMAIN: fibraos.local
+      INTERNAL_API_SECRET: ci_internal_secret
+      SUPER_ADMIN_EMAILS: admin@demo.test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 9 }
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "pnpm"
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Lint
+        run: pnpm lint
+      - name: Typecheck
+        run: pnpm typecheck
+      - name: Unit tests
+        run: pnpm test
+
+  integration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    needs: lint-typecheck-unit
+    # Testcontainers levanta Postgres+Redis reales en Docker dentro del runner.
+    # ubuntu-latest tiene Docker out-of-the-box.
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 9 }
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "pnpm"
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Pre-pull images (paraleliza con install)
+        run: |
+          docker pull postgis/postgis:16-3.4 &
+          docker pull redis:7-alpine &
+          wait
+      - name: Integration tests (testcontainers)
+        run: pnpm test:integration
+        env:
+          TESTCONTAINERS_HOST_OVERRIDE: localhost
+          TESTCONTAINERS_RYUK_DISABLED: "false"

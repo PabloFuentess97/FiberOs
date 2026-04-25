@@ -1,0 +1,14 @@
+node_modules
+.next
+.git
+.env.local
+.env.*.local
+*.log
+dist
+coverage
+playwright-report
+test-results
+tests/fixtures/*.xlsx
+.vscode
+.idea
+docs
