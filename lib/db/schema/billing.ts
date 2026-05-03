@@ -1,4 +1,5 @@
 import { pgTable, pgEnum, text, timestamp, uuid, integer, jsonb, index } from "drizzle-orm/pg-core";
+import { sql } from "drizzle-orm";
 import { organizations } from "./tenancy";
 import { users } from "./auth";
 
@@ -75,7 +76,7 @@ export const outboxEvents = pgTable(
   (t) => ({
     pendingIdx: index("outbox_pending_idx")
       .on(t.createdAt)
-      .where(t.dispatchedAt.isNull()),
+      .where(sql`${t.dispatchedAt} IS NULL`),
   }),
 );
 
