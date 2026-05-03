@@ -18,7 +18,6 @@ const nextConfig: NextConfig = {
   experimental: {
     serverActions: { bodySizeLimit: "10mb" },
     typedRoutes: false,
-    nodeMiddleware: true,
   },
   images: {
     remotePatterns: [

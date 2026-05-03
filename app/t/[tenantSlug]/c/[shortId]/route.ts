@@ -3,37 +3,50 @@ import { and, eq, isNull } from "drizzle-orm";
 import { headers } from "next/headers";
 import { db } from "@/lib/db";
 import { boxes } from "@/lib/db/schema/network";
+import { organizations, tenantDomains } from "@/lib/db/schema/tenancy";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 /**
  * Ruta canónica del QR: `https://{tenant.hostname}/c/{shortId}`.
- * Redirige según User-Agent:
- *   - Móvil → `/field/boxes/{id}` (PWA offline-first)
- *   - Escritorio → `/boxes/{id}` (dashboard)
- *
- * Esta ruta NO requiere sesión — el QR se escanea antes del login.
- * Si no hay sesión, Middleware redirigirá al login con next=… y preservará el
- * destino, así que aquí solo nos preocupamos del resolver short_id → id.
+ * Redirige según User-Agent: móvil → `/field/boxes/{id}`, escritorio → `/boxes/{id}`.
+ * No requiere sesión: el QR se escanea antes del login.
  */
 export async function GET(
   _req: Request,
   ctx: { params: Promise<{ tenantSlug: string; shortId: string }> },
 ) {
-  const { shortId } = await ctx.params;
-
-  // El header x-tenant-id lo inyecta el middleware tras resolver el hostname
+  const { tenantSlug, shortId } = await ctx.params;
   const h = await headers();
-  const tenantId = h.get("x-tenant-id");
-  if (!tenantId) return new NextResponse("unknown tenant", { status: 400 });
+  const tenantHost = h.get("x-tenant-host");
+
+  // Resolver tenant a partir del slug del path o del host (custom domain)
+  let orgId: string | null = null;
+  if (tenantSlug && tenantSlug !== "__by_host__") {
+    const [row] = await db
+      .select({ id: organizations.id })
+      .from(organizations)
+      .where(eq(organizations.slug, tenantSlug))
+      .limit(1);
+    if (row) orgId = row.id;
+  } else if (tenantHost) {
+    const [row] = await db
+      .select({ id: organizations.id })
+      .from(tenantDomains)
+      .innerJoin(organizations, eq(organizations.id, tenantDomains.organizationId))
+      .where(eq(tenantDomains.hostname, tenantHost))
+      .limit(1);
+    if (row) orgId = row.id;
+  }
+  if (!orgId) return new NextResponse("unknown tenant", { status: 400 });
 
   const [box] = await db
     .select({ id: boxes.id })
     .from(boxes)
     .where(
       and(
-        eq(boxes.organizationId, tenantId),
+        eq(boxes.organizationId, orgId),
         eq(boxes.shortId, shortId),
         isNull(boxes.deletedAt),
       ),
